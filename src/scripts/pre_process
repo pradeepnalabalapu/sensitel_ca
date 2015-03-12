@@ -1,1 +1,2 @@
 sed -i 's/Date Center/Data Center/' data/*.csv 
+sed -i 's/Clairty/Clarity/' data/*.csv
