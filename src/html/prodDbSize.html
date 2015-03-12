@@ -42,6 +42,13 @@
     var margin = 20,
             diameter = 960;
 
+    var db_type_color = function(db_type) {
+        var color =  db_type == 'oracle' ? d3.hsl(0,0.8,0.8):
+                db_type == 'mysql'? d3.hsl(60,0.8,0.8) :
+                        db_type == 'mssql'? d3.hsl(300,0.8,0.8) : null;
+        return color;
+    }
+
     var color = d3.scale.linear()
             .domain([-1, 5])
             .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
@@ -69,7 +76,7 @@
                 .data(nodes)
                 .enter().append("circle")
                 .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-                .style("fill", function(d) { return d.children ? color(d.depth) : null; })
+                .style("fill", function(d) { return d.children ? color(d.depth) : db_type_color(d.db_sw); })
                 .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
 
         var text = svg.selectAll("text")
@@ -77,6 +84,7 @@
                 .enter().append("text")
                 .attr("class", "label")
                 .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+                .style("font-weight","bold")
                 .style("display", function(d) { return d.parent === root ? null : "none"; })
                 .text(function(d) { return d.name; });
 
