@@ -115,6 +115,15 @@
 
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
+        //adding title
+        svg.append("text")
+                .attr("x", 0)
+                .attr("y", 20 - (diameter / 2))
+                .attr("text-anchor", "middle")
+                .style("font-size", "20px")
+                .style("text-decoration", "underline")
+                .text("Servers, grouped by Product & DB versions");
+
         function zoom(d) {
             var focus0 = focus; focus = d;
 
