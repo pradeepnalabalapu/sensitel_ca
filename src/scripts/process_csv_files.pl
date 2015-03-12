@@ -63,6 +63,7 @@ foreach my $csvfile (glob("data/*.csv")) {
 
 #printJSON(\@out);
 printJSONbyProduct(\@out);
+printJSONbyProductSize(\@out);
 
 sub printJSON {
 	my $fdout;
@@ -136,6 +137,51 @@ sub printJSONbyProduct {
 }
 
 
+sub printJSONbyProductSize {
+	my $fdout;
+	my $outJSONFile= 'src/html/byProdDbSize.json';
+	open($fdout, ">".$outJSONFile) or die ("ERROR : Create file $outJSONFile failed\n");
+	my $arrayRef = shift;
+
+	my %hash= ();
+
+    for (my $i=0; $i <@$arrayRef; $i++) {
+        my $product = product_filter($arrayRef->[$i][$PRODUCT]);
+
+        my $db_version = $arrayRef->[$i][$DB_VERSION];
+        my $db_sw_name = $arrayRef->[$i][$DB_SW_NAME];
+				my $db_size = $arrayRef->[$i][$DB_SIZE] ;
+        if(! exists $hash{$product}) {
+            $hash{$product} = { };
+        } 
+				if (!exists $hash{$product}{$db_version}) {
+					$hash{$product}{$db_version} = { sw => $db_sw_name, db_size => 0}
+				}
+        $hash{$product}{$db_version}{db_size}+= $db_size;
+    }
+	printf $fdout qq({\n "name" : "byProductNum", "children" : [\n);
+
+	my @prods = keys %hash;
+	foreach my $prod (@prods) {
+		printf $fdout qq(\t{ "name" : "$prod", "children" : [\n);
+		my @db_vers = keys $hash{$prod};
+		foreach my $db_ver (@db_vers) {
+			printf $fdout qq(\t\t{ "name" : "$db_ver", "size": $hash{$prod}{$db_ver}{db_size}, "db_sw" : "$hash{$prod}{$db_ver}{sw}"});
+			printf $fdout "%s\n", ($db_ver ne $db_vers[-1]) ? ',':'';
+		}
+		printf $fdout qq(\t\t]\n\t});
+		printf $fdout "%s\n", ($prod ne $prods[-1])?',':'';
+	}
+
+	printf $fdout qq( ]\n});
+
+	close($fdout);
+
+}
+
+#
+# sanitize product field. Need to fix this to be more accurate.
+#
 sub product_filter {
 	my $prod = shift;
 	if($prod =~ m:\n$:) {

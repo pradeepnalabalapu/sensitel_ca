@@ -81,7 +81,7 @@ sub readData {
 	my @tokens;
 	my @indexOfKeys = @{$self->{indexOfKey}};
 	while ($line = <$fd>) {
-		my @tokens = split(',', $line); 
+		my @tokens = split(/\s*,\s*/, $line); 
 		my $storage_token= $tokens[$indexOfKeys[$STORAGE_SIZE]];
 
 		#printf ("pre-storage_token = $storage_token\n");
