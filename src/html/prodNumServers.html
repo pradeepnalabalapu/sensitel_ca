@@ -48,7 +48,7 @@
 <script>
 
     var margin = 20,
-            diameter = 960;
+            diameter = 800;
 
     var db_types = { oracle : {descr: 'Oracle', color: d3.hsl(0,0.8,0.8) },
         mssql : { descr: "SQL SERVER", color: d3.hsl(300,0.8,0.8)},
@@ -73,7 +73,7 @@
 
     var svg = d3.select("body").append("svg")
             .attr("width", diameter)
-            .attr("height", diameter)
+            .attr("height", diameter+20)
             .append("g")
             .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
@@ -99,12 +99,12 @@
                 .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
                 .style('font-weight', "bold")
                 .style("display", function(d) { return d.parent === root ? null : "none"; })
-                .text(function(d) { return d.name; });
+                .text(function(d) { return d.name+  ( ('size' in d) ? '('+ d.size+')' : null); });
 
         var node = svg.selectAll("circle,text");
 
         d3.select("body")
-                .style("background", color(-1))
+                //.style("background", color(-1))
                 .on("click", function() { zoom(root); });
 
         var legend = svg.append('g')
@@ -113,16 +113,25 @@
                 .style("font-size","12px")
                 .call(d3.legend);
 
+        svg.append('svg:image')
+                .attr('xlink:href','../images/SENS.PNG')
+                .attr('x',-diameter/2)
+                .attr('y',-diameter/2)
+                .attr('width',100)
+                .attr('height',40);
+
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
         //adding title
         svg.append("text")
+                .data([{}])
                 .attr("x", 0)
-                .attr("y", 20 - (diameter / 2))
+                .attr("y", (diameter / 2) +10 )
                 .attr("text-anchor", "middle")
                 .style("font-size", "20px")
                 .style("text-decoration", "underline")
                 .text("Servers, grouped by Product & DB versions");
+
 
         function zoom(d) {
             var focus0 = focus; focus = d;
@@ -148,9 +157,12 @@
         }
     });
 
-    d3.select(self.frameElement).style("height", diameter + "px");
+        d3.select(self.frameElement).style("height", diameter + "px")
+			.style("background", color(-1));
 
 </script>
+
+Copyright Sensitel 2015
 
 </body>
 </html>
