@@ -116,17 +116,20 @@ sub printJSONbyProduct {
 				}
         $hash{$product}{$db_version}{count}++;
     }
+
 	printf $fdout qq({\n "name" : "byProductNum", "children" : [\n);
 
 	my @prods = keys %hash;
 	foreach my $prod (@prods) {
 		printf $fdout qq(\t{ "name" : "$prod", "children" : [\n);
 		my @db_vers = keys $hash{$prod};
+		my $count = 0;
 		foreach my $db_ver (@db_vers) {
 			printf $fdout qq(\t\t{ "name" : "$db_ver", "size": $hash{$prod}{$db_ver}{count}, "db_sw" : "$hash{$prod}{$db_ver}{sw}"});
 			printf $fdout "%s\n", ($db_ver ne $db_vers[-1]) ? ',':'';
+			$count += $hash{$prod}{$db_ver}{count};
 		}
-		printf $fdout qq(\t\t]\n\t});
+		printf $fdout qq(\t\t], "size" : $count\n\t});
 		printf $fdout "%s\n", ($prod ne $prods[-1])?',':'';
 	}
 
@@ -164,12 +167,16 @@ sub printJSONbyProductSize {
 	my @prods = keys %hash;
 	foreach my $prod (@prods) {
 		printf $fdout qq(\t{ "name" : "$prod", "children" : [\n);
+		my  $size = 0;
 		my @db_vers = keys $hash{$prod};
 		foreach my $db_ver (@db_vers) {
 			printf $fdout qq(\t\t{ "name" : "$db_ver", "size": $hash{$prod}{$db_ver}{db_size}, "db_sw" : "$hash{$prod}{$db_ver}{sw}"});
 			printf $fdout "%s\n", ($db_ver ne $db_vers[-1]) ? ',':'';
+			$size += $hash{$prod}{$db_ver}{db_size};
 		}
-		printf $fdout qq(\t\t]\n\t});
+		if ($size < 1000 ) { $size .= "GB"; }
+		else { $size = (int ($size/1000))."TB"; }
+		printf $fdout qq(\t\t], "size" : "$size" \n\t});
 		printf $fdout "%s\n", ($prod ne $prods[-1])?',':'';
 	}
 
