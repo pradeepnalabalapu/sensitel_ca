@@ -1,14 +1,29 @@
 #!/usr/bin/perl
 
+#################################################################
+##  Program to process multiple csv files and to create a unified
+##   csv file or json
+## The input csv files sometimes may not have fields in the same 
+##  columns. Also fields may not be named exactly the same in all 
+##  files. Script takes care of those issues.
+#################################################################
+
 use strict;
 use lib 'src/scripts';
 use CsvProcessor;
 
 my $outJSONFile = "out.json";
+my $outCSVFile = "out.csv";
 
-my $DEBUG_FLOW = 0;
+our $DEBUG_FLOW = 0;
+
 my $DEBUG=$DEBUG_FLOW;
 
+####################################################################
+##  The constants below define which column numbers for different 
+##    fields. The array @keys, holds the string representation of 
+##    each field. It is used while printing out JSON objects
+####################################################################
 
 our $SNO = 0;
 our $DATACENTER = 1;
@@ -35,6 +50,11 @@ $keys[$PRODUCT] = 'product';
 #mysql csv header - S.No,DB ServerName,Data Center,Product,Prod/Non Prod/ slave ,Mysql version ,Nimsoft Monitoring,Enerprise monitoring,DB Size,OS Size,Active / in active ,comments
 
 #keyword order SNO,DATACENTER,DB_SW_NAME,DB_TYPE, DB_VERSION, STORAGE_SIZE, DB_SIZE, PRODUCT
+###############################################################################
+##  keyword hash defines what headings to expect for fields in different csv 
+##    files the key of this hash is the input csv type (which is also database 
+##    program type here)
+###############################################################################
 my %keyword = (
 	'mysql' => ['S.No', 'Data Center','DB SW','Prod/Non Prod/ slave','Mysql version','OS Size','DB Size', 'Product' ],
 	'mssql' => ['S.No', 'Data Center','DB SW','Database Type','Database Version','Storage Sizes','Database Sizes','Product'],
@@ -48,8 +68,8 @@ my @out = ();
 
 	printf ("----------------\n") if ($DEBUG & $DEBUG_FLOW);
 
-foreach my $csvfile (glob("data/*.csv")) {
-	$csvfile =~ m:data/(\D*)\d*.csv:;
+foreach my $csvfile (glob("data/dbinfo/*.csv")) {
+	$csvfile =~ m:data/dbinfo/(\D*)\d*.csv:; #capture the non-number word part of the filename
 	my $dbsw = $1;
 	if ($DEBUG & $DEBUG_FLOW) {
 		printf ("key for keyword hash is $dbsw\n");
@@ -62,8 +82,9 @@ foreach my $csvfile (glob("data/*.csv")) {
 }
 
 #printJSON(\@out);
-printJSONbyProduct(\@out);
-printJSONbyProductSize(\@out);
+printCSV(\@out);
+#printJSONbyProduct(\@out);
+#printJSONbyProductSize(\@out);
 
 sub printJSON {
 	my $fdout;
@@ -91,6 +112,25 @@ sub printJSON {
 
 	printf $fdout ("]\n");
 }
+
+
+
+sub printCSV {
+	my $fdout;
+	my $arrayRef = shift;
+	my $filename = shift;
+ 	$filename or $filename=$outCSVFile;
+	open($fdout, ">".$filename) or die ("ERROR : Create file $filename failed\n");
+
+	printf $fdout  join(",", @keys)."\n";
+
+	for(my $i=0; $i<@$arrayRef; $i++){
+		$arrayRef->[$i]->[$DATACENTER] =~ s:\(.*\)::; #removing any paranthesis
+		printf $fdout join(",",@{$arrayRef->[$i]})."\n";
+	}
+}
+
+
 
 #JSON : byProduct : { name : 'product', children :[
 #           { name: dbversion, size: num_servers, color: db_sw } ... ]
@@ -208,5 +248,13 @@ sub product_filter {
 	}
 
 	return $prod;
+}
+
+# 
+# sanitize datacenter field. Need to fix this
+#
+sub datacenter_filter {
+	my $datacenter = shift;
+	$datacenter =~ s:\(.*\):: ; # remove anything in parantheses
 }
 
