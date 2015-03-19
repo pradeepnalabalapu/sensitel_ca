@@ -5,12 +5,13 @@ package CsvProcessor;
 use strict;
 use List::Util 'max';
 
-my $DEBUG_FLOW = 1;
+our $DEBUG_FLOW;
+
 sub new {
 	my $class = shift;
-	my $filename = shift;
-	my $db_sw_name = shift;
-	my $keywordArray = shift;
+	my $filename = shift; #name of csv file
+	my $db_sw_name = shift; #name of the db program (eg. oracle)
+	my $keywordArray = shift; #an array of column names to expect in csv file
 	my $debug = shift;
 	my $fd;
 	if ($debug & $DEBUG_FLOW) {
@@ -32,7 +33,7 @@ sub new {
 
 # Reads header from the csvfile, 
 # for the keys in $self->{keywords}, it finds matching position within header
-#   the positions are stored as $self->{indexOfKeys}
+#   the positions are stored as $self->{indexOfKey}
 sub getHeader {
 	my $self = shift;
 	printf ("id=$self->{filename} fd=$self->{fd}\n") if ($self->{debug} & $DEBUG_FLOW);
@@ -52,6 +53,8 @@ sub getHeader {
 	my @indexOfKey = ();
 	my $headerlen = @headerTokens;
 		
+# foreach key in keywords array, find matching headerToken. 
+#   set indexOfKey[$key] = index of the token (i.e. column number)
 	for (my $i=0; $i < $len ; $i++){
 		my $key = $self->{keywords}[$i];
 		printf ("key = $key\n") if ($self->{debug} & $DEBUG_FLOW);
@@ -75,12 +78,14 @@ sub getHeader {
 
 sub readData {
 	my $self = shift;
-	my $outArrayRef = shift;
+	my $outArrayRef = shift; #referece to output array
 	my $line;
 	my $fd = $self->{fd};
 	my @tokens;
 	my @indexOfKeys = @{$self->{indexOfKey}};
 	while ($line = <$fd>) {
+		if ($line =~ /^[\s,]*$/) { next; } #skip empty lines
+		$line =~ s/\n$//; #remove newline character at end of line if any
 		my @tokens = split(/\s*,\s*/, $line); 
 		my $storage_token= $tokens[$indexOfKeys[$STORAGE_SIZE]];
 
