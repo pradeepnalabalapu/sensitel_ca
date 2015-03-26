@@ -25,7 +25,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
                 var arr;
                 var i;
-                //console.log('query '+varname+' result='+JSON.stringify(data));
+                console.log('query '+varname+' result='+JSON.stringify(data));
                 if(data.results.length===0 || data.results[0].data.length === 0) return;
 
                 if(data.results[0].data[0].row.length>1) {
@@ -95,11 +95,21 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         var numservers_query = 'match (s:server)-[:SERVES]->(p:product) '+
             'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
             'where s=server '+
-            'return count(distinct s.id) as NumServers, db.sw as Database, dbver.version as Version,  p.name as Product  '+
+            'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
+            'order by p.name';
+
+        var dbsize_query = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'where s=server '+
+            'return distinct s.id as Id, sum(s.dbSize) as DbSize, db.sw as Database, dbver.version as Version,  p.name as Product  '+
             'order by p.name';
 
         $scope.neoquery(numservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
             convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
+//$scope.neoquery(dbsize_query, $scope.process_result_fn('NumServers',$scope.DEBUG, function() {}));
+        //convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
+
+
 
 
 
