@@ -1,6 +1,6 @@
 #!/bin/sh
-sed -i 's/Date Center/Data Center/' data/*.csv 
-sed -i 's/Clairty/Clarity/' data/*.csv
+sed -i 's/Date Center/Data Center/' data/dbinfo/*.csv 
+sed -i 's/Clairty/Clarity/' data/dbinfo/*.csv
 src/scripts/joinLines.pl data/dbinfo/oracle.csv
 src/scripts/joinLines.pl data/dbinfo/mysql.csv
 src/scripts/joinLines.pl data/dbinfo/mssql.csv
