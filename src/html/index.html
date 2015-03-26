@@ -48,59 +48,52 @@
             stroke:black;
             opacity:0.8;}
 
+        table {
+            margin-right : 30px;
+        }
+
 
 
     </style>
 
 </head>
 <body >
-  <div ng-controller="queryController">
+<div ng-controller="queryController" style="height: 95%;">
 
 
-  <tabset>
 
-  <tab heading='Chart1'>
+
     <h2>Database size grouped by Product & DB version</h2>
-    <div id='prodDbSize' style='height: 80%; width: 80%;'></div>
+    <div id='prodDbSize' style='height: 80%; float: left;'></div>
 
-  </tab>
-  <tab heading='Chart2'>
-    <h2>Database servers grouped by Product & DB version</h2>
-    <div id='prodNumServers' style='height: 80%; width: 80%'></div>
-  </tab>
-  
-  <tab heading='Data'>
-    <table>
-      <thead >
-        
-      <span ng-repeat="col in tabs['query1']['columns']">
-        {{col}}
-      </span>
-      </thead>
-      <tbody>
+
+
+
+    <table style="float:right; padding-right: 10px" border="1" cellpadding="5">
+        <thead >
+
+        <th ng-repeat="col in tabs['query1']['columns']">
+            {{col}}
+        </th>
+
+        </thead>
+        <tbody>
         <tr ng-repeat="row in tabs['query1']['data']">
-        <td>{{row[0]}}</td>
-        <td>{{row[1]}}</td>
-        <td>{{row[2]}}</td>
+            <td ng-repeat="elem in row">{{elem}}</td>
         </tr>
-      </tbody>
+        </tbody>
     </table>
-    <br>---------------------------------<br>
-  </tab>
-
-  </tabset>
 
 
-
-  </div>
-  Copyright Sensitel 2015
+</div>
+Copyright Sensitel 2015
 
 
 </body>
 
 <script type='text/javascript'>
-  prodDbSize('prodDbSize','byProdDbSize.json');
-  //groupCircles('prodNumServers','byProdNumServers.json');
+  groupCircles('prodDbSize','byProdDbSize.json');
+  groupCircles('prodNumServers','byProdNumServers.json');
 </script>
 
 </html>
