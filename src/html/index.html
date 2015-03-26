@@ -11,6 +11,7 @@
 <script src="../../lib/js/d3/d3.legend.js"></script>
 
 <script src='../js/groupCircles.js'></script>
+<script src='../js/prodDbSize.js'></script>
 
 
     <meta charset="UTF-8">
@@ -67,6 +68,25 @@
     <h2>Database servers grouped by Product & DB version</h2>
     <div id='prodNumServers' style='height: 80%; width: 80%'></div>
   </tab>
+  
+  <tab heading='Data'>
+    <table>
+      <thead >
+        
+      <span ng-repeat="col in tabs['query1']['columns']">
+        {{col}}
+      </span>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in tabs['query1']['data']">
+        <td>{{row[0]}}</td>
+        <td>{{row[1]}}</td>
+        <td>{{row[2]}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>---------------------------------<br>
+  </tab>
 
   </tabset>
 
@@ -79,8 +99,8 @@
 </body>
 
 <script type='text/javascript'>
-  groupCircles('prodDbSize','byProdDbSize.json');
-  groupCircles('prodNumServers','byProdNumServers.json');
+  prodDbSize('prodDbSize','byProdDbSize.json');
+  //groupCircles('prodNumServers','byProdNumServers.json');
 </script>
 
 </html>
