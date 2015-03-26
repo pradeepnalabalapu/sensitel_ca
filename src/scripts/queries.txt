@@ -1,0 +1,24 @@
+1. list all products
+  match (p:product) return p.name;
+
+2. List all server id, their types and product served
+match (n:server)-[:SERVES]->(p:product) return n.id,n.types,p.name;
+
+3. Foreach server, list the database type and product serving
+  match (n:server)-[:SERVES]->(p:product) with n,p
+  match n-[:RUNS]->(dbver)-[:DBSW]-(db:database)
+   return distinct db.sw,  p.name;
+
+4. Same as above, list dbversion as well
+  match (n:server)-[:SERVES]->(p:product) with n,p
+  match n-[:RUNS]->(dbver)-[:DBSW]-(db:database)
+   return distinct db.sw, dbver,  p.name 
+   order by p.name;
+
+5. Delete all nodes and relationships
+  match (n) 
+  optional match (n)-[r]-()
+  delete n,r;
+
+
+
