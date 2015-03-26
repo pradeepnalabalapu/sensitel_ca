@@ -11,6 +11,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         $scope.tabs.result_material_head = 'Results';
 
         $scope.tabs.suppliers=[];
+        $scope.DEBUG = 0;
         //$scope.result_material = '';
         //$scope.nonCFSiResult_material = '';
 
@@ -19,7 +20,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 // that collects all results into an array and saves it as
 // $scope[varname]
 //---------------------------------
-        $scope.process_result_fn = function(varname, debug) {
+        $scope.process_result_fn = function(varname, debug, cb) {
             return function(data, status, headers, config) {
 
                 var arr;
@@ -51,13 +52,19 @@ angular.module("sensitelApp", ['ui.bootstrap'])
                 $scope.tabs[varname]={};
                 $scope.tabs[varname]['data']=arr;
                 $scope.tabs[varname]['columns'] = data.results[0].columns;
+                cb($scope.tabs[varname]);
                 //console.log(JSON.stringify(arr));
-                var json_obj = convertTableToTree(varname, $scope.tabs[varname], 'Product', 'Version', 'NumServers');
-                //console.log('json_obj = '+JSON.stringify(json_obj));
-                groupCirclesJsonObj('chart0',json_obj, 'NumServers', 'Database');
+
             };
         };
 
+        function convertToJsonFn(varname, nodefield, namefield, sizefield, colorfield) {
+            return function() {
+                var json_obj = convertTableToTree(varname, $scope.tabs[varname], nodefield, namefield, sizefield);
+                //console.log('json_obj = '+JSON.stringify(json_obj));
+                groupCirclesJsonObj('chart0', json_obj, sizefield, colorfield);
+            }
+        }
 
 
 //---------------------------
@@ -82,6 +89,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         };
 
 
+
         //----------- run some initial queries for
         //---- filling up dropdown boxes
         var numservers_query = 'match (s:server)-[:SERVES]->(p:product) '+
@@ -89,7 +97,12 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'where s=server '+
             'return count(distinct s.id) as NumServers, db.sw as Database, dbver.version as Version,  p.name as Product  '+
             'order by p.name';
-        $scope.neoquery(numservers_query, $scope.process_result_fn('numservers'));
+
+        $scope.neoquery(numservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
+            convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
+
+
+
 
         /*
          $scope.watch("tabs['numservers']", function(table_data){
