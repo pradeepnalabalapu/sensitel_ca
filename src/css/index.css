@@ -32,3 +32,9 @@
         table {
             margin-right : 30px;
         }
+
+        td, th {
+            padding : 1px;
+            text-align: center;
+        }
+

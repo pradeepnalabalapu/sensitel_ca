@@ -21,7 +21,7 @@ while (my $line = <$fd>) {
 	my @commas = ($line =~ m/,/g);
 	$n_commas += @commas;
 #printf ("n_commas=$n_commas\n"); 
-	if($n_commas == $num_commas) {
+	if($n_commas >= $num_commas) {
 		printf $fdout $cumul_line.$line;
 	 	$n_commas=0;
 		$cumul_line='';

@@ -5,7 +5,7 @@ package CsvProcessor;
 use strict;
 use List::Util 'max';
 
-our $DEBUG_FLOW;
+our $DEBUG_FLOW=1;
 
 sub new {
 	my $class = shift;
@@ -13,6 +13,7 @@ sub new {
 	my $db_sw_name = shift; #name of the db program (eg. oracle)
 	my $keywordArray = shift; #an array of column names to expect in csv file
 	my $debug = shift;
+printf("got debug=$debug DEBUG_FLOW=$DEBUG_FLOW \n");
 	my $fd;
 	if ($debug & $DEBUG_FLOW) {
 		printf "Creating Processor object for file $filename\n";

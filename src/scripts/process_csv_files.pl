@@ -15,7 +15,7 @@ use CsvProcessor;
 my $outJSONFile = "out.json";
 my $outCSVFile = "out.csv";
 
-our $DEBUG_FLOW = 0;
+our $DEBUG_FLOW = 1;
 
 my $DEBUG=$DEBUG_FLOW;
 
@@ -81,7 +81,10 @@ foreach my $csvfile (glob("data/dbinfo/*.csv")) {
 	printf ("----------------\n") if ($DEBUG & $DEBUG_FLOW);
 }
 
-#printJSON(\@out);
+my $out_length = @out;
+printf ("Got $out_length rows\n");
+
+printJSON(\@out);
 printCSV(\@out);
 #printJSONbyProduct(\@out);
 #printJSONbyProductSize(\@out);
@@ -126,6 +129,7 @@ sub printCSV {
 
 	for(my $i=0; $i<@$arrayRef; $i++){
 		$arrayRef->[$i]->[$DATACENTER] =~ s:\(.*\)::; #removing any paranthesis
+		$arrayRef->[$i][$PRODUCT] = product_filter($arrayRef->[$i][$PRODUCT]);
 		printf $fdout join(",",@{$arrayRef->[$i]})."\n";
 	}
 }

@@ -92,20 +92,70 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
         //----------- run some initial queries for
         //---- filling up dropdown boxes
-        var numservers_query = 'match (s:server)-[:SERVES]->(p:product) '+
+        $scope.chart = {};
+        var numservers={};
+        numservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
             'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
             'where s=server '+
             'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
-            'order by p.name';
+            'order by lower(Product), Database, Version';
+        numservers.heading = 'Number of database servers, grouped by product type and database version';
+        numservers.args=['NumServers', 'Product', 'Version', 'NumServers', 'Database'];
+        $scope.chart['footprint']=numservers;
+
+        var clarityservers={};
+        clarityservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'where s=server AND p.name ="clarity"'+
+            'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
+            'order by Product, Database, Version';
+        clarityservers.heading = 'Number of database servers hosting Clarity, grouped by database version';
+        clarityservers.args=['NumServers', 'Product', 'Version', 'NumServers', 'Database'];
+        $scope.chart['clarity']=clarityservers;
 
         var dbsize_query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'where s=server '+
+            'match serv-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'where s=serv '+
             'return distinct s.id as Id, sum(s.dbSize) as DbSize, db.sw as Database, dbver.version as Version,  p.name as Product  '+
             'order by p.name';
 
+        var datacenters= {};
+        datacenters.query = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match serv-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'match server-[:IN]-(dc) '+
+            'where s=server AND s=serv '+
+            'return dc.name as Datacenter, p.name as Product ,  db.sw as Database, count(distinct s.id) as NumServers '+
+            'order by Datacenter, lower(Product), Database';
+        datacenters.heading = 'Number of database servers, grouped by datacenter and product';
+        datacenters.args = ['NumServers', 'Datacenter', 'Product', 'NumServers', 'Database'];
+        $scope.chart['datacenters'] = datacenters;
+
+
+        $scope.runQuery = function(key) {
+            d3.select("svg")
+                .remove();
+            var query_obj = $scope.chart[key];
+            var query_str = query_obj.query;
+            var args = query_obj.args;
+            $scope.heading = query_obj.heading;
+            $scope.neoquery(query_str, $scope.process_result_fn('result',$scope.DEBUG,
+                convertToJsonFn('result', args[1], args[2], args[3], args[4])));
+        }
+
+/*
         $scope.neoquery(numservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
             convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
+*/
+/*
+        $scope.neoquery(datacenters_query, $scope.process_result_fn('result',$scope.DEBUG,
+            convertToJsonFn('NumServers', 'Datacenter', 'Product', 'NumServers', 'Database')));
+            */
+
+/*
+        $scope.neoquery(clarityservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
+            convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
+            */
+
 //$scope.neoquery(dbsize_query, $scope.process_result_fn('NumServers',$scope.DEBUG, function() {}));
         //convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
 
@@ -114,14 +164,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
 
 
-        /*
-         $scope.watch("tabs['numservers']", function(table_data){
-         console.log('scope.tabs[numservers] changed');
-         if(table_data) {
-         convertTableToTree('byProductNum', table_data, 'Product', 'Version');
-         }
-         }, true)
-         */
+
 
         function convertTableToTree (name,table_data, nodefield, namefield, sizefield) {
             console.log('Inside convertTableToTree');
