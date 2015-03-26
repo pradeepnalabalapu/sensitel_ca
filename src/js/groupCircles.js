@@ -42,6 +42,8 @@ function groupCircles(div_id, jsonfile) {
         var focus = root,
                 nodes = pack.nodes(root),
                 view;
+                
+                console.log('nodes.length='+nodes.length);
 
         var circle = svg.selectAll("circle")
                 .data(nodes)
@@ -49,7 +51,7 @@ function groupCircles(div_id, jsonfile) {
                 .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
                 .style("fill", function(d) { return d.children ? color(d.depth) : db_type_color(d.db_sw); })
                 .attr('data-legend', function(d) {return d.children? null : db_types[d.db_sw].descr;})
-                .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+                .on("click", function(d) { if (focus !== d) {zoom(d); d3.event.stopPropagation();} });
 
         var text = svg.selectAll("text")
                 .data(nodes)
@@ -82,8 +84,6 @@ function groupCircles(div_id, jsonfile) {
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
         //adding title
-
-
 
         function zoom(d) {
             var focus0 = focus; focus = d;
