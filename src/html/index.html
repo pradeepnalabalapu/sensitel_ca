@@ -11,7 +11,7 @@
 <script src="../../lib/js/d3/d3.legend.js"></script>
 
 <script src='../js/groupCircles.js'></script>
-<script src='../js/prodDbSize.js'></script>
+
 
 
     <meta charset="UTF-8">
@@ -25,8 +25,8 @@
 
 
 
-    <h2>Database size grouped by Product & DB version</h2>
-    <div id='prodDbSize' style='height: 80%; float: left;'></div>
+    <h2>Number of servers, grouped by Product & DB version</h2>
+    <div id='prodNumServers' style='height: 80%; float: left;'></div>
 
 
 
@@ -34,13 +34,13 @@
     <table style="float:right; padding-right: 10px" border="1" cellpadding="5">
         <thead >
 
-        <th ng-repeat="col in tabs['query1']['columns']">
+        <th ng-repeat="col in tabs['numservers']['columns']">
             {{col}}
         </th>
 
         </thead>
         <tbody>
-        <tr ng-repeat="row in tabs['query1']['data']">
+        <tr ng-repeat="row in tabs['numservers']['data']">
             <td ng-repeat="elem in row">{{elem}}</td>
         </tr>
         </tbody>
@@ -54,7 +54,7 @@ Copyright Sensitel 2015
 </body>
 
 <script type='text/javascript'>
-  groupCircles('prodDbSize','byProdDbSize.json');
+  //groupCircles('prodDbSize','byProdDbSize.json');
   groupCircles('prodNumServers','byProdNumServers.json');
 </script>
 
