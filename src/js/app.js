@@ -24,7 +24,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
                 var arr;
                 var i;
-                console.log('query '+varname+' result='+JSON.stringify(data));
+                //console.log('query '+varname+' result='+JSON.stringify(data));
                 if(data.results.length===0 || data.results[0].data.length === 0) return;
 
                 if(data.results[0].data[0].row.length>1) {
@@ -53,7 +53,8 @@ angular.module("sensitelApp", ['ui.bootstrap'])
                 $scope.tabs[varname]['columns'] = data.results[0].columns;
                 //console.log(JSON.stringify(arr));
                 var json_obj = convertTableToTree(varname, $scope.tabs[varname], 'Product', 'Version', 'NumServers');
-                console.log('json_obj = '+JSON.stringify(json_obj));
+                //console.log('json_obj = '+JSON.stringify(json_obj));
+                groupCirclesJsonObj('chart0',json_obj, 'NumServers', 'Database');
             };
         };
 
