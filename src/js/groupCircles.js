@@ -1,5 +1,12 @@
 
-function groupCircles(div_id, jsonfile) {
+function groupCircles(div_id, jsonfile, circleSizeField, circleColorField) {
+
+    if(!circleSizeField) {
+        circleSizeField = 'size';
+    }
+    if(!circleColorField){
+        circleColorField = 'db_sw';
+    }
 
     var margin = 20;
     var div = d3.select('#'+div_id);
@@ -29,7 +36,7 @@ function groupCircles(div_id, jsonfile) {
         .padding(2)
         .size([diameter - margin, diameter - margin])
         .value(function (d) {
-            return d.size;
+            return d[circleSizeField];
         })
 
     var svg = div.append("svg")
@@ -52,10 +59,10 @@ function groupCircles(div_id, jsonfile) {
                 return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root";
             })
             .style("fill", function (d) {
-                return d.children ? color(d.depth) : db_type_color(d.db_sw);
+                return d.children ? color(d.depth) : db_type_color(d[circleColorField]);
             })
             .attr('data-legend', function (d) {
-                return d.children ? null : db_types[d.db_sw].descr;
+                return d.children ? null : db_types[d[circleColorField]].descr;
             })
             .on("click", function (d) {
                 if (focus !== d) zoom(d), d3.event.stopPropagation();
@@ -73,7 +80,7 @@ function groupCircles(div_id, jsonfile) {
                 return d.parent === root ? null : "none";
             })
             .text(function (d) {
-                return d.name + ( ('size' in d) ? '(' + d.size + ')' : null);
+                return d.name + ( (circleSizeField in d) ? '(' + d[circleSizeField] + ')' : null);
             });
 
         var node = svg.selectAll("circle,text");
