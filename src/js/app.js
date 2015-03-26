@@ -82,8 +82,9 @@ angular.module("sensitelApp", ['ui.bootstrap'])
   //----------- run some initial queries for
   //---- filling up dropdown boxes
   var query1 = 'match (s:server)-[:SERVES]->(p:product) '+
-  'match n-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-  'return distinct db.sw as database, dbver.version as version,  p.name as product  '+ 
+  'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+  'where s=server '+
+  'return count(distinct s.id) as NumServers, db.sw as Database, dbver.version as Version,  p.name as Product  '+
   'order by p.name';
   $scope.neoquery(query1,
       $scope.process_result_fn('query1'));
