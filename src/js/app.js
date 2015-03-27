@@ -26,7 +26,24 @@ angular.module("sensitelApp", ['ui.bootstrap'])
                 var arr;
                 var i;
                 //console.log('query '+varname+' result='+JSON.stringify(data));
-                if(data.results.length===0 || data.results[0].data.length === 0) return;
+                $scope.tabs[varname]={};
+
+                if(data.results.length===0) {
+                    if(data.errors.length) {
+                        var keys = Object.keys(data.errors[0])
+                        $scope.tabs[varname]['columns'] = keys;
+                        var arr = [];
+                        for (var i_err=0; i_err < data.errors.length; i_err++) {
+                            arr[i_err] = [];
+                            for (var i = 0; i < keys.length; i++) {
+                                arr[i_err][i] = data.errors[0][keys[i]];
+                            }
+                        }
+                        $scope.tabs[varname]['data'] = arr;
+                    }
+                    return;
+                }
+                if(data.results[0].data.length === 0) return;
 
                 if(data.results[0].data[0].row.length>1) {
                     arr =[ ];
@@ -49,7 +66,6 @@ angular.module("sensitelApp", ['ui.bootstrap'])
                 } else if(debug ==2 && arr.length> 0 ) {
                     console.log('query results='+JSON.stringify(data));
                 }
-                $scope.tabs[varname]={};
                 $scope.tabs[varname]['data']=arr;
                 $scope.tabs[varname]['columns'] = data.results[0].columns;
                 cb($scope.tabs[varname]);
@@ -119,10 +135,15 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         clarityservers.args=['Product', 'Version', 'NumServers', 'Database'];
         $scope.chart['clarity']=clarityservers;
 
-        var dbsize_query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match serv-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'return distinct s.id as Id, sum(s.dbSize) as DbSize, db.sw as Database, dbver.version as Version,  p.name as Product  '+
-            'order by p.name';
+        var dbsize={};
+        dbsize.query = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'return p.name as Product,  db.sw as Database, dbver.version as Version, sum(s.dbSize) as DbSizeGB '+
+            'order by lower(Product), Database, Version';
+        dbsize.heading = 'Database sizes, grouped by product type and database version';
+        dbsize.args=['Product', 'Version', 'DbSizeGB', 'Database'];
+        $scope.chart['dbSize']=dbsize;
+
 
         var datacenters= {};
         datacenters.query = 'match (s:server)-[:SERVES]->(p:product) '+
@@ -148,13 +169,12 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
 
         function convertTableToTree (name,table_data, nodefield, namefield, sizefield) {
-            console.log('Inside convertTableToTree');
+            //console.log('Inside convertTableToTree');
             var table_obj = {name: name, children: []};
             var nodeindex = table_data.columns.indexOf(nodefield);
             var nameindex = table_data.columns.indexOf(namefield);
             var sizeindex = table_data.columns.indexOf(sizefield);
 
-            console.log('nodeindex='+nodeindex+' nameindex='+nameindex);
             var tree_index = {};
             var tree_index_count =0;
             var cols = table_data.columns;

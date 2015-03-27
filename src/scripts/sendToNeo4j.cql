@@ -4,6 +4,6 @@ MATCH (DC:datacenter {name: csvLine.dataCenter})
  CREATE (DB:database {sw: csvLine.dBProg}),
 	(DBVER:dbversion {version: csvLine.dBVersion}),
 	(PROD: product {name: csvLine.product}),
-	(s:server {id: csvLine.SerialNo, storage: csvLine.storage, dbSize: csvLine.dBSize, types: csvLine.dBType }),
+	(s:server {id: csvLine.SerialNo, storage: toInt(csvLine.storage), dbSize: toInt(csvLine.dBSize), types: csvLine.dBType }),
  (PROD)<-[:SERVES]-(s)-[:RUNS]->(DBVER)-[:DBSW]->(DB),
 	(s)-[:IN]->(DC);
