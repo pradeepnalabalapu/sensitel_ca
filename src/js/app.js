@@ -123,7 +123,9 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by lower(Product), Database, Version';
         numservers.heading = 'Number of database servers, grouped by product type and database version';
         numservers.args=['Product', 'Version', 'NumServers', 'Database'];
+        numservers.footnotes = 'The circles are scaled by number of servers';
         $scope.chart['footprint']=numservers;
+
 
         var clarityservers={};
         clarityservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
@@ -133,6 +135,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by Product, Database, Version';
         clarityservers.heading = 'Number of database servers hosting Clarity, grouped by database version';
         clarityservers.args=['Product', 'Version', 'NumServers', 'Database'];
+        clarityservers.footnotes = 'The circles are scaled by number of servers';
         $scope.chart['clarity']=clarityservers;
 
         var dbsize={};
@@ -142,6 +145,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by lower(Product), Database, Version';
         dbsize.heading = 'Database sizes, grouped by product type and database version';
         dbsize.args=['Product', 'Version', 'DbSizeGB', 'Database'];
+        dbsize.footnotes = 'The circles are scaled by database size';
         $scope.chart['dbSize']=dbsize;
 
 
@@ -153,6 +157,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by Datacenter, lower(Product), Database';
         datacenters.heading = 'Number of database servers, grouped by datacenter and product';
         datacenters.args = [ 'Datacenter', 'Product', 'NumServers', 'Database'];
+        datacenters.footnotes = 'The circles are scaled by number of servers';
         $scope.chart['datacenters'] = datacenters;
 
 
@@ -163,6 +168,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             var query_str = query_obj.query;
             var args = query_obj.args;
             $scope.heading = query_obj.heading;
+            $scope.footnotes = query_obj.footnotes;
             $scope.neoquery(query_str, $scope.process_result_fn('result',$scope.DEBUG,
                 convertToJsonFn('result', args[0], args[1], args[2], args[3])));
         }
