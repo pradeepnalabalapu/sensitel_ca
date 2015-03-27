@@ -100,7 +100,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
             'order by lower(Product), Database, Version';
         numservers.heading = 'Number of database servers, grouped by product type and database version';
-        numservers.args=['NumServers', 'Product', 'Version', 'NumServers', 'Database'];
+        numservers.args=['Product', 'Version', 'NumServers', 'Database'];
         $scope.chart['footprint']=numservers;
 
         var clarityservers={};
@@ -110,7 +110,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
             'order by Product, Database, Version';
         clarityservers.heading = 'Number of database servers hosting Clarity, grouped by database version';
-        clarityservers.args=['NumServers', 'Product', 'Version', 'NumServers', 'Database'];
+        clarityservers.args=['Product', 'Version', 'NumServers', 'Database'];
         $scope.chart['clarity']=clarityservers;
 
         var dbsize_query = 'match (s:server)-[:SERVES]->(p:product) '+
@@ -120,14 +120,14 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by p.name';
 
         var datacenters= {};
-        datacenters.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match serv-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'match server-[:IN]-(dc) '+
-            'where s=server AND s=serv '+
-            'return dc.name as Datacenter, p.name as Product ,  db.sw as Database, count(distinct s.id) as NumServers '+
-            'order by Datacenter, lower(Product), Database';
+        datacenters.query = 'match (prod:product) with (distinct prod) as p '+
+            'match p<-[:SERVES]-(serv:server) with (distinct serv) as s match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            //'match server-[:IN]-(dc) '+
+            //'where s=server '+
+            'return p.name as Product , dbver.version as Version, db.sw as Database, count(s.id) as NumServers '+
+            'order by lower(Product), Database';
         datacenters.heading = 'Number of database servers, grouped by datacenter and product';
-        datacenters.args = ['NumServers', 'Datacenter', 'Product', 'NumServers', 'Database'];
+        datacenters.args = [ 'Product', 'Version', 'NumServers', 'Database'];
         $scope.chart['datacenters'] = datacenters;
 
 
@@ -139,31 +139,8 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             var args = query_obj.args;
             $scope.heading = query_obj.heading;
             $scope.neoquery(query_str, $scope.process_result_fn('result',$scope.DEBUG,
-                convertToJsonFn('result', args[1], args[2], args[3], args[4])));
+                convertToJsonFn('result', args[0], args[1], args[2], args[3])));
         }
-
-/*
-        $scope.neoquery(numservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
-            convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
-*/
-/*
-        $scope.neoquery(datacenters_query, $scope.process_result_fn('result',$scope.DEBUG,
-            convertToJsonFn('NumServers', 'Datacenter', 'Product', 'NumServers', 'Database')));
-            */
-
-/*
-        $scope.neoquery(clarityservers_query, $scope.process_result_fn('NumServers',$scope.DEBUG,
-            convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
-            */
-
-//$scope.neoquery(dbsize_query, $scope.process_result_fn('NumServers',$scope.DEBUG, function() {}));
-        //convertToJsonFn('NumServers', 'Product', 'Version', 'NumServers', 'Database')));
-
-
-
-
-
-
 
 
         function convertTableToTree (name,table_data, nodefield, namefield, sizefield) {
@@ -198,44 +175,6 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             });
             return table_obj;
         };
-
-
-/*
-
- $scope.$watch("tabs.material", function(value) {
- /// Query #1 is here
- var query = "match (sm)-[:SUPPLIES_MATERIAL]->(m) where m.name='"+value+"' return distinct sm order by sm.name";
- var processFn = $scope.process_result_fn("results_material");
- $scope.neoquery(query,processFn);
- } );
-
- $scope.$watch("tabs.nonCFSiMaterial", function(value) {
- // Query #2 is here
- var query = "match (sm)-[:SUPPLIES_MATERIAL]->(m) where m.name='"+value+"' and sm.cfs_status <> 'Certified' return distinct sm order by sm.name";
- var processFn = $scope.process_result_fn("results_nonCFSiMaterial");
- $scope.neoquery(query,processFn);
- } );
-
- $scope.countryobj = {
- supplier_country: "",
- material: "",
- smelter_country:""
- };
-
-
- //initial query
- $scope.neoquery('match (s:supplier) return distinct s.name',
- $scope.process_result_fn('suppliers'));
-
- $scope.$watch('tabs.supplier', function(value){
- if(!value) return;
- var query = 'match ({name: "'+value+'"}) <- [:SUPPLIES_TO]-(sm) -[:SUPPLIES_TO]-> (s:supplier) where s.name <> "'+value+'" and not sm.name =~ "Global High Tech HeadQuarters" return distinct sm.name, s.name order by sm.name';
- console.log('query = '+query);
- var processFn = $scope.process_result_fn('results_smelterSupplier');
- $scope.neoquery(query,processFn);
-
- });
- */
 
 
 }]);
