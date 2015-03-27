@@ -25,7 +25,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
                 var arr;
                 var i;
-                console.log('query '+varname+' result='+JSON.stringify(data));
+                //console.log('query '+varname+' result='+JSON.stringify(data));
                 if(data.results.length===0 || data.results[0].data.length === 0) return;
 
                 if(data.results[0].data[0].row.length>1) {
@@ -102,8 +102,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         $scope.chart = {};
         var numservers={};
         numservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'where s=server '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
             'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
             'order by lower(Product), Database, Version';
         numservers.heading = 'Number of database servers, grouped by product type and database version';
@@ -112,8 +111,8 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
         var clarityservers={};
         clarityservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match server-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'where s=server AND p.name ="clarity"'+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            'where p.name ="clarity"'+
             'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
             'order by Product, Database, Version';
         clarityservers.heading = 'Number of database servers hosting Clarity, grouped by database version';
@@ -122,7 +121,6 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
         var dbsize_query = 'match (s:server)-[:SERVES]->(p:product) '+
             'match serv-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'where s=serv '+
             'return distinct s.id as Id, sum(s.dbSize) as DbSize, db.sw as Database, dbver.version as Version,  p.name as Product  '+
             'order by p.name';
 
