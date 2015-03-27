@@ -58,6 +58,13 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             };
         };
 
+        // Json for the tree to show in the circles chart
+        // nodefield is the field that we use for the circles top level group
+        // namefield is the next level of hierarchy for the circles i.e. smaller circles
+        //    inside the bigger circles
+        // sizefield is the field used to determine size of circles
+        // colorfield  determines which color circles are drawn in
+
         function convertToJsonFn(varname, nodefield, namefield, sizefield, colorfield) {
             return function() {
                 var json_obj = convertTableToTree(varname, $scope.tabs[varname], nodefield, namefield, sizefield);
@@ -120,14 +127,13 @@ angular.module("sensitelApp", ['ui.bootstrap'])
             'order by p.name';
 
         var datacenters= {};
-        datacenters.query = 'match (prod:product) with (distinct prod) as p '+
-            'match p<-[:SERVES]-(serv:server) with (distinct serv) as s match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            //'match server-[:IN]-(dc) '+
-            //'where s=server '+
-            'return p.name as Product , dbver.version as Version, db.sw as Database, count(s.id) as NumServers '+
-            'order by lower(Product), Database';
+        datacenters.query = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
+            ' match s-[:IN]-(dc) '+
+            'return dc.name as Datacenter, p.name as Product , db.sw as Database, count(s.id) as NumServers '+
+            'order by Datacenter, lower(Product), Database';
         datacenters.heading = 'Number of database servers, grouped by datacenter and product';
-        datacenters.args = [ 'Product', 'Version', 'NumServers', 'Database'];
+        datacenters.args = [ 'Datacenter', 'Product', 'NumServers', 'Database'];
         $scope.chart['datacenters'] = datacenters;
 
 
