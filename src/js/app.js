@@ -68,7 +68,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
                 }
                 $scope.tabs[varname]['data']=arr;
                 $scope.tabs[varname]['columns'] = data.results[0].columns;
-                cb($scope.tabs[varname]);
+                if(cb) cb($scope.tabs[varname]);
                 //console.log(JSON.stringify(arr));
 
             };
@@ -95,6 +95,7 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 // callback function cb
 //---------------------------
         $scope.neoquery = function (query, cb) {
+            //console.log('query = '+query);
             var url = "http://localhost:7474/db/data/transaction/commit";
             var req = {
                 method: 'POST',
@@ -117,10 +118,12 @@ angular.module("sensitelApp", ['ui.bootstrap'])
         //---- filling up dropdown boxes
         $scope.chart = {};
         var numservers={};
-        numservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
-            'order by lower(Product), Database, Version';
+        numservers.match = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) ';
+        numservers.filter = '';
+        numservers.return ='return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
+            'order by lower(Product), Database, Version'
+        numservers.query = numservers.match + numservers.return;
         numservers.heading = 'Number of database servers, grouped by product type and database version';
         numservers.args=['Product', 'Version', 'NumServers', 'Database'];
         numservers.footnotes = 'The circles are scaled by number of servers';
@@ -128,21 +131,24 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
 
         var clarityservers={};
-        clarityservers.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'where p.name ="clarity"'+
-            'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
+        clarityservers.match = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) ';
+        clarityservers.return = 'return p.name as Product ,  db.sw as Database, dbver.version as Version, count(distinct s.id) as NumServers '+
             'order by Product, Database, Version';
+        clarityservers.filter ='where p.name ="clarity" ';
+        clarityservers.query = clarityservers.match+ clarityservers.filter + clarityservers.return;
         clarityservers.heading = 'Number of database servers hosting Clarity, grouped by database version';
         clarityservers.args=['Product', 'Version', 'NumServers', 'Database'];
         clarityservers.footnotes = 'The circles are scaled by number of servers';
         $scope.chart['clarity']=clarityservers;
 
         var dbsize={};
-        dbsize.query = 'match (s:server)-[:SERVES]->(p:product) '+
-            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            'return p.name as Product,  db.sw as Database, dbver.version as Version, sum(s.dbSize) as DbSizeGB '+
+        dbsize.match = 'match (s:server)-[:SERVES]->(p:product) '+
+            'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) ';
+        dbsize.filter = '';
+        dbsize.return ='return p.name as Product,  db.sw as Database, dbver.version as Version, sum(s.dbSize) as DbSizeGB '+
             'order by lower(Product), Database, Version';
+        dbsize.query = dbsize.match+ dbsize.return ;
         dbsize.heading = 'Database sizes, grouped by product type and database version';
         dbsize.args=['Product', 'Version', 'DbSizeGB', 'Database'];
         dbsize.footnotes = 'The circles are scaled by database size';
@@ -150,22 +156,72 @@ angular.module("sensitelApp", ['ui.bootstrap'])
 
 
         var datacenters= {};
-        datacenters.query = 'match (s:server)-[:SERVES]->(p:product) '+
+        datacenters.match = 'match (s:server)-[:SERVES]->(p:product) '+
             'match s-[:RUNS]->(dbver)-[:DBSW]-(db:database) '+
-            ' match s-[:IN]-(dc) '+
-            'return dc.name as Datacenter, p.name as Product , db.sw as Database, count(s.id) as NumServers '+
+            ' match s-[:IN]-(dc) ';
+        datacenters.filter = '';
+        datacenters.return ='return dc.name as Datacenter, p.name as Product , db.sw as Database, count(s.id) as NumServers '+
             'order by Datacenter, lower(Product), Database';
+        datacenters.query = datacenters.match + datacenters.return;
         datacenters.heading = 'Number of database servers, grouped by datacenter and product';
         datacenters.args = [ 'Datacenter', 'Product', 'NumServers', 'Database'];
         datacenters.footnotes = 'The circles are scaled by number of servers';
         $scope.chart['datacenters'] = datacenters;
 
 
+        var services_query = 'match (s:service) return s;';
+        function createServices (table_data){
+            var data = table_data.data;
+            var data_length = data.length;
+            for (var i=0; i<data_length; i++) {
+                var name = data[i].name;
+                $scope.services.push(name);
+                $scope.selected_services.push(name);
+            }
+            $scope.service_filter = createServicesFilter($scope.services);
+        };
+
+        function createServicesFilter(services) {
+            var service_filter = '';
+            var service_length = services.length;
+            if(service_length) {
+                service_filter = 'match (p)-[:SERVICE_BY]->(se:service) where ';
+                for (var i = 0; i < service_length; i++) {
+                    service_filter += ' se.name ="' + services[i] + '"';
+                    if ( i!= (service_length-1)) {
+                        service_filter += ' OR ';
+                    }
+                }
+                service_filter += ' ';
+            }
+            return service_filter;
+        };
+
+        $scope.services= [];
+        $scope.selected_services=[];
+        $scope.service_filter ='';
+        $scope.neoquery(services_query, $scope.process_result_fn('services', $scope.DEBUG, createServices));
+
+        $scope.$watch('selected_services', function(newValue, oldValue) {
+            $scope.service_filter = createServicesFilter(newValue);
+            if ($scope.button) {
+                d3.select("svg")
+                    .remove();
+                var query_obj = $scope.chart[$scope.button];
+                var query_str = query_obj.match + query_obj.filter + $scope.service_filter+ query_obj.return;
+                var args = query_obj.args;
+                $scope.neoquery(query_str, $scope.process_result_fn('result',$scope.DEBUG,
+                    convertToJsonFn('result', args[0], args[1], args[2], args[3])));
+            }
+        },1);
+
+
         $scope.runQuery = function(key) {
             d3.select("svg")
                 .remove();
+            $scope.button = key;
             var query_obj = $scope.chart[key];
-            var query_str = query_obj.query;
+            var query_str = query_obj.match + query_obj.filter + $scope.service_filter+ query_obj.return;
             var args = query_obj.args;
             $scope.heading = query_obj.heading;
             $scope.footnotes = query_obj.footnotes;
