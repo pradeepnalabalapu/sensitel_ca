@@ -1,16 +1,16 @@
 <html ng-app="sensitelApp">
 
 <head>
-<title> CA Database Analysis</title>
-<!-- h2> CA Database Analysis </h2-->
-<script src="../../lib/js/angular/angular.js"></script>
-<script src='../../lib/js/ui-bootstrap-tpls-0.12.0.js'></script>
-<script type="text/javascript" src="../js/app.js"></script>
-<link href='../../lib/css/bootstrap.min.css' type='text/css' rel='stylesheet'></link>
-<script src="../../lib/js/d3/d3.v3.min.js"></script>
-<script src="../../lib/js/d3/d3.legend.js"></script>
+    <title> CA Database Analysis</title>
+    <!-- h2> CA Database Analysis </h2-->
+    <script src="../../lib/js/angular/angular.js"></script>
+    <script src='../../lib/js/ui-bootstrap-tpls-0.12.0.js'></script>
+    <script type="text/javascript" src="../js/app.js"></script>
+    <link href='../../lib/css/bootstrap.min.css' type='text/css' rel='stylesheet'></link>
+    <script src="../../lib/js/d3/d3.v3.min.js"></script>
+    <script src="../../lib/js/d3/d3.legend.js"></script>
 
-<script src='../js/groupCircles.js'></script>
+    <script src='../js/groupCircles.js'></script>
     <script src="../js/groupCirclesJsonObj.js"></script>
 
 
@@ -22,56 +22,57 @@
 </head>
 <body >
 <div ng-controller="queryController">
-<div class="container-fluid">
-    <div>
-        <button ng-repeat="(key, value) in chart" ng-click="runQuery(key)">
-            {{key}}
-        </button>
-    </div>
-
-
-<div class="row">
-
-    <!--h2></h2-->
-    <!--h2></h2-->
-    <h2>{{heading}}</h2>
-    <div class="col col-xs-8 col-lg-8">
-
-        <div class='col col-xs-12 col-lg-12' id='chart0' style='height: 85%; float: left;'>
-
+    <div class="container-fluid">
+        <div>
+            <button ng-repeat="(key, value) in chart" ng-click="runQuery(key)">
+                {{key}}
+            </button>
         </div>
-        <h3 class="col col-xs-12 col-lg-12"> <em>{{footnotes}}</em></h3>
+
+
+        <div class="row">
+
+            <!--h2></h2-->
+            <!--h2></h2-->
+            <h2>{{heading}}</h2>
+            <div class="col col-xs-8 col-lg-8">
+
+                <div class='col col-xs-12 col-lg-12' id='chart0' style='height: 85%; float: left;'>
+
+                </div>
+                <h3 class="col col-xs-12 col-lg-12"> <em>{{footnotes}}</em></h3>
+            </div>
+
+            <div class="col col-xs-4 col-lg-4">
+                <select multiple size="3" ng-model='selected_services' ng-options='service for service in services' > </select>
+                <table style="float:right; padding-right: 10px" border="1" cellpadding="5px" >
+                    <thead >
+
+                    <th text-align='center' ng-repeat="col in tabs['result']['columns']">
+                        {{col}}
+                    </th>
+
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in tabs['result']['data']">
+                        <td align='center' padding="5px" ng-repeat="elem in row">{{elem}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <em>Copyright Sensitel 2015</em>
     </div>
-
-    <div class="col col-xs-4 col-lg-4">
-    <table style="float:right; padding-right: 10px" border="1" cellpadding="5px" >
-        <thead >
-
-        <th text-align='center' ng-repeat="col in tabs['result']['columns']">
-            {{col}}
-        </th>
-
-        </thead>
-        <tbody>
-        <tr ng-repeat="row in tabs['result']['data']">
-            <td align='center' padding="5px" ng-repeat="elem in row">{{elem}}</td>
-        </tr>
-        </tbody>
-    </table>
-    </div>
-    </div>
-
-
-
-<em>Copyright Sensitel 2015</em>
-</div>
 
 </div>
 </body>
 
 <script type='text/javascript'>
-  //groupCircles('prodDbSize','byProdDbSize.json');
-  //groupCirclesJsonObj('prodNumServers',json_obj);
+    //groupCircles('prodDbSize','byProdDbSize.json');
+    //groupCirclesJsonObj('prodNumServers',json_obj);
 </script>
 
 </html>
